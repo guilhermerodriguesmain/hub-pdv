@@ -1,0 +1,6 @@
+# variaveis de ambiente
+.env
+
+# Arquivos de compilação python
+*__pycache__/*
+

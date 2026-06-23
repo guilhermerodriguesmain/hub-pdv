@@ -1,0 +1,66 @@
+services:
+
+  ## Serviço principal do hub-pdv
+  ## Este contempla a aplicação FastAPI, que é responsável por fornecer a API RESTful para o hub-pdv.
+
+  hub-pdv:
+    container_name: hub-pdv
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+  
+  ## Serviço de banco de dados MongoDB
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  ## Serviço de mensageria RabbitMQ
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  ## Serviço de mensageria Kafka
+  kafka:
+    container_name: kafka
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: kafka
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  ## Serviço de mensageria Zookeeper
+  zookeeper:
+    container_name: zookeeper
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/data
+
+  ## Rede de serviços
+  ## Todos os serviços estão conectados a uma rede interna chamada "hub-pdv-network",
+  ## permitindo que eles se comuniquem entre si de forma segura e isolada.
+  
+
+  ## Definição de volumes para persistência de dados
+  ## Estes volumes são utilizados para garantir que os dados dos serviços sejam persistidos mesmo após a parada dos containers.
+
+volumes:
+  mongodb_data:
+  zookeeper_data:
